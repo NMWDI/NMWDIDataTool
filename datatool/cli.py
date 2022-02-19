@@ -259,7 +259,7 @@ def mlocations():
 
 
 def output(writer, url, records):
-    print(f'=============== {url} ===============')
+    print(f"=============== {url} ===============")
     for i, r in enumerate(records):
         print(i, r)
         geom = r["location"]
@@ -380,7 +380,6 @@ def get_county_polygon(name):
 
 def warning(msg):
     click.secho(msg, fg="red")
-
 
 
 if __name__ == "__main__":
