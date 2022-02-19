@@ -41,7 +41,7 @@ setup(
         "pyyaml",
         "pyshp",
         "shapely",
-        "pysta"
+        "pysta",
     ],
     entry_points={
         "console_scripts": [

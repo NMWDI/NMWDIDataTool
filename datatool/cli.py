@@ -203,8 +203,8 @@ def things(name, agency, verbose, out):
     "--pages",
     default=1,
     help="Number of pages of results to return. Each page is 1000 records by "
-         "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
-         "descending sorting",
+    "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
+    "descending sorting",
 )
 @click.option("--expand")
 @click.option("--within")
@@ -214,26 +214,26 @@ def things(name, agency, verbose, out):
 @click.option(
     "--out",
     help="Location to save file. use file extension to define output type. "
-         "valid extensions are .shp, .csv, and .json. JSON output is used by "
-         "default",
+    "valid extensions are .shp, .csv, and .json. JSON output is used by "
+    "default",
 )
 @click.option("--url", default=None)
 @click.option("--group", default=None)
 @click.option("--names-only", is_flag=True)
 def locations(
-        name,
-        agency,
-        query,
-        pages,
-        expand,
-        within,
-        bbox,
-        screen,
-        verbose,
-        out,
-        url,
-        group,
-        names_only,
+    name,
+    agency,
+    query,
+    pages,
+    expand,
+    within,
+    bbox,
+    screen,
+    verbose,
+    out,
+    url,
+    group,
+    names_only,
 ):
     client = Client(base_url=url)
 
@@ -253,7 +253,7 @@ def locations(
         # bbox = Polygon(
         #     [(pts[a][0], pts[b][1]) for a, b in [(0, 0), (1, 0), (1, 1), (0, 1)]]
         # )
-        bbox = box(bbox.split(',')).wkt
+        bbox = box(bbox.split(",")).wkt
         filterargs.append(f"st_within(location, geography'{bbox}')")
     elif within:
         wkt = make_wkt(within)
@@ -279,38 +279,35 @@ def locations(
 
 
 def mlocations():
-    urls = ['st2.newmexicowaterdata.org', 'https://labs.waterdata.usgs.gov/sta/v1.1/']
+    urls = ["st2.newmexicowaterdata.org", "https://labs.waterdata.usgs.gov/sta/v1.1/"]
     # urls = ['https://labs.waterdata.usgs.gov/sta/v1.1']
-    outt='mlocation1.out.shp'
+    outt = "mlocation1.out.shp"
     with shapefile.Writer(outt) as w:
-        w.field('name', 'C')
-        w.field('source_url', 'C')
-        w.field('id', 'C')
+        w.field("name", "C")
+        w.field("source_url", "C")
+        w.field("id", "C")
         for url in urls:
             client = Client(base_url=url)
             filterargs = []
-            if url == 'https://labs.waterdata.usgs.gov/sta/v1.1/':
+            if url == "https://labs.waterdata.usgs.gov/sta/v1.1/":
                 filterargs.append("Location/description eq 'Well'")
 
-            wkt = make_wkt('NM:Bernalillo')
+            wkt = make_wkt("NM:Bernalillo")
             within = make_within(wkt)
             filterargs.append(within)
 
-            query = ' and '.join(filterargs)
+            query = " and ".join(filterargs)
             locs = client.get_locations(pages=1, limit=10, query=query, verbose=True)
             output(w, url, locs)
 
 
 def output(writer, url, records):
-    print(f'=============== {url} ===============')
+    print(f"=============== {url} ===============")
     for r in records:
         geom = r["location"]
         coords = geom["coordinates"]
         writer.point(*coords)
-        writer.record(name=r['name'],
-                      source_url=url,
-                      id=r['@iot.id'])
-
+        writer.record(name=r["name"], source_url=url, id=r["@iot.id"])
 
 
 def make_within(wkt):
@@ -325,8 +322,8 @@ def make_wkt(within):
             pass
         elif within.endswith(".shp"):
             pass
-    elif within == 'NM':
-        wkt = get_state_bb('NM')
+    elif within == "NM":
+        wkt = get_state_bb("NM")
     else:
         # load a raw WKT object
         try:
