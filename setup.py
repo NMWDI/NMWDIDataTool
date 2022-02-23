@@ -21,7 +21,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="nmwdidatatool",
-    version="0.0.0",
+    version="0.0.2",
     author="Jake Ross",
     description="NMWDI Data Tool",
     long_description=long_description,
@@ -32,16 +32,12 @@ setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
+        "cython",
         "Click",
-        "paho-mqtt",
-        "pyproj",
         "requests",
-        "jsonschema",
-        "pyodata",
-        "pyyaml",
-        "pyshp",
         "shapely",
-        "pysta",
+        "pyshp",
+        "pysta>=0.0.28",
     ],
     entry_points={
         "console_scripts": [
