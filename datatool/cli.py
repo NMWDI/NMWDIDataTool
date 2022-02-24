@@ -160,8 +160,8 @@ def things(name, agency, verbose, out):
     "--pages",
     default=1,
     help="Number of pages of results to return. Each page is 1000 records by "
-         "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
-         "descending sorting",
+    "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
+    "descending sorting",
 )
 @click.option("--expand")
 @click.option("--within")
@@ -171,26 +171,26 @@ def things(name, agency, verbose, out):
 @click.option(
     "--out",
     help="Location to save file. use file extension to define output type. "
-         "valid extensions are .shp, .csv, and .json. JSON output is used by "
-         "default",
+    "valid extensions are .shp, .csv, and .json. JSON output is used by "
+    "default",
 )
 @click.option("--url", default=None)
 @click.option("--group", default=None)
 @click.option("--names-only", is_flag=True)
 def locations(
-        name,
-        agency,
-        query,
-        pages,
-        expand,
-        within,
-        bbox,
-        screen,
-        verbose,
-        out,
-        url,
-        group,
-        names_only,
+    name,
+    agency,
+    query,
+    pages,
+    expand,
+    within,
+    bbox,
+    screen,
+    verbose,
+    out,
+    url,
+    group,
+    names_only,
 ):
     client = Client(base_url=url)
 
@@ -241,8 +241,8 @@ def locations(
     "--pages",
     default=1,
     help="Number of pages of results to return. Each page is 1000 records by "
-         "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
-         "descending sorting",
+    "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
+    "descending sorting",
 )
 @click.option("--expand")
 @click.option("--within")
@@ -252,19 +252,32 @@ def locations(
 @click.option(
     "--out",
     help="Location to save file. use file extension to define output type. "
-         "valid extensions are .shp, .csv, and .json. JSON output is used by "
-         "default",
+    "valid extensions are .shp, .csv, and .json. JSON output is used by "
+    "default",
 )
 @click.option("--url", default=None)
 @click.option("--group", default=None)
 @click.option("--names-only", is_flag=True)
-def mlocations(query, pages, expand, within, bbox, screen, verbose, out, url, group, names_only, ):
-    urls = [("NMBGMR", "st2.newmexicowaterdata.org"),
-            #("OSE", "ose.newmexicowaterdata.org"),
-            ("USGS", "https://labs.waterdata.usgs.gov/sta/v1.1")
-            ]
+def mlocations(
+    query,
+    pages,
+    expand,
+    within,
+    bbox,
+    screen,
+    verbose,
+    out,
+    url,
+    group,
+    names_only,
+):
+    urls = [
+        ("NMBGMR", "st2.newmexicowaterdata.org"),
+        # ("OSE", "ose.newmexicowaterdata.org"),
+        ("USGS", "https://labs.waterdata.usgs.gov/sta/v1.1"),
+    ]
     # urls = ['https://labs.waterdata.usgs.gov/sta/v1.1']
-    if out and out.endswith('.shp'):
+    if out and out.endswith(".shp"):
         with shapefile.Writer(out) as w:
             w.field("name", "C")
             w.field("source_url", "C")
@@ -291,14 +304,15 @@ def mlocations(query, pages, expand, within, bbox, screen, verbose, out, url, gr
                 locs = client.get_locations(pages=pages, query=query, verbose=True)
                 output(w, url, locs, da)
 
+
 @cli.command()
 @click.option("--query")
 @click.option(
     "--pages",
     default=1,
     help="Number of pages of results to return. Each page is 1000 records by "
-         "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
-         "descending sorting",
+    "default. Results ordered by location.@iot.id ascending.  Use negative page numbers for "
+    "descending sorting",
 )
 @click.option("--expand")
 @click.option("--within")
@@ -308,14 +322,14 @@ def mlocations(query, pages, expand, within, bbox, screen, verbose, out, url, gr
 @click.option(
     "--out",
     help="Location to save file. use file extension to define output type. "
-         "valid extensions are .shp, .csv, and .json. JSON output is used by "
-         "default",
+    "valid extensions are .shp, .csv, and .json. JSON output is used by "
+    "default",
 )
 def pods(query, pages, expand, within, bbox, screen, verbose, out):
 
     url = "ose.newmexicowaterdata.org"
     # urls = ['https://labs.waterdata.usgs.gov/sta/v1.1']
-    if out and out.endswith('.shp'):
+    if out and out.endswith(".shp"):
         with shapefile.Writer(out) as w:
             w.field("name", "C")
             w.field("source_url", "C")
@@ -338,7 +352,7 @@ def pods(query, pages, expand, within, bbox, screen, verbose, out):
 
             query = " and ".join(filterargs)
             locs = client.get_locations(pages=pages, query=query, verbose=True)
-            output(w, url, locs, 'OSE')
+            output(w, url, locs, "OSE")
 
 
 def output(writer, url, records, default_agency):
@@ -348,9 +362,12 @@ def output(writer, url, records, default_agency):
         geom = r["location"]
         coords = geom["coordinates"]
         writer.point(*coords)
-        writer.record(name=r["name"], source_url=url,
-                      id=r["@iot.id"],
-                      agency=r.get('properties', {}).get('agency', default_agency))
+        writer.record(
+            name=r["name"],
+            source_url=url,
+            id=r["@iot.id"],
+            agency=r.get("properties", {}).get("agency", default_agency),
+        )
 
 
 def make_bbox_filter(bbox):
