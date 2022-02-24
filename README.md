@@ -23,7 +23,7 @@ nmwdi water depths --agency CABQ --location YALE* --out out.json --last 2
 nmwdi water depths --agency CABQ --location YALE* --out out.csv --last 2
 nmwdi water elevations --agency CABQ --location YALE* --out out.csv --last 2
 ```
-###Locations
+### Locations
 ```
 nmwdi locations --within "bernalillo" --verbose --out foo.shp --group True
 nmwdi locations --within bernallilo --names-only
