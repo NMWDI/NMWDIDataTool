@@ -28,8 +28,8 @@ nmwdi water elevations --agency CABQ --location YALE* --out out.csv --last 2
 nmwdi locations --within "bernalillo" --verbose --out foo.shp --group True
 nmwdi locations --within bernallilo --names-only
 nmwdi locations --within bernalillo --names-only --agency CABQ
-nmwdi locations --pages 1 --bbox "-108 35, -106 34.9" --verbose --screen
-nmwdi locations --pages 1 --bbox "-108 35, -106 34.9" --verbose --screen --out foo.json
+nmwdi locations --pages 1 --bbox "-108,-106, 34.9, 35" --verbose --screen 
+nmwdi locations --pages 1 --bbox "-108,-106, 34.9, 35" --verbose --screen --out foo.json
 nmwdi locations --pages 1 --name "startswith(name, 'AR-')"
 nmwdi locations --pages 1 --name "startswith(name, 'AR-')" --verbose
 nmwdi locations --pages 1 --agency ISC_SEVEN_RIVERS --verbose
