@@ -21,7 +21,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="nmwdidatatool",
-    version="0.0.3",
+    version="0.0.4",
     author="Jake Ross",
     description="NMWDI Data Tool",
     long_description=long_description,

@@ -86,7 +86,7 @@ def water_obs(location, agency, within, last, out, screen, verbose, dsname):
         if location.endswith("*"):
             filter_args.append(f"startswith(name, '{location[:-1]}')")
         else:
-            filter_args.append(f"name eq '{name}'")
+            filter_args.append(f"name eq '{location}'")
     if filter_args:
         query = " and ".join(filter_args)
 
