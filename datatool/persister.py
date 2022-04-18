@@ -68,10 +68,10 @@ class ObsContainer:
         }
 
     def __repr__(self):
-        out = 'Location, LocationId, Thing, ThingId, Datastream, DatastreamId, PhenomenonTime, ResultTime, Result\n'
+        out = "Location, LocationId, Thing, ThingId, Datastream, DatastreamId, PhenomenonTime, ResultTime, Result\n"
         for line in self.torow():
-            line = ','.join([str(l) for l in line])
-            out += f'{line}\n'
+            line = ",".join([str(l) for l in line])
+            out += f"{line}\n"
         return out
 
 
@@ -188,5 +188,6 @@ def csv_output(out, records_generator, query, base_url, **kw):
         nrecords = count
 
     return nrecords
+
 
 # ============= EOF =============================================
