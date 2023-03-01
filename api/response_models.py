@@ -29,4 +29,5 @@ class WaterLevel(BaseModel):
     phenomenonTime: str
     depth_to_water: float
 
+
 # ============= EOF =============================================

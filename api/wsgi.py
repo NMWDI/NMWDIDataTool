@@ -34,39 +34,41 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get('/mrg_locations')
+@app.get("/mrg_locations")
 async def get_waterlevels_locations():
-
     return StreamingResponse(
         iter(get_mrg_locations_csv()),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=mrg_locations.csv"}
+        headers={"Content-Disposition": f"attachment; filename=mrg_locations.csv"},
     )
 
 
-@app.get('/mrg_waterlevels')
+@app.get("/mrg_waterlevels")
 async def get_waterlevels():
     csvs = get_mrg_waterlevels_csv()
     zip_io = BytesIO()
-    with zipfile.ZipFile(zip_io, mode='w', compression=zipfile.ZIP_DEFLATED) as temp_zip:
+    with zipfile.ZipFile(
+        zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
+    ) as temp_zip:
         for name, ci in csvs:
-            temp_zip.writestr(f'{name}.csv', ci)
+            temp_zip.writestr(f"{name}.csv", ci)
 
     return StreamingResponse(
         iter([zip_io.getvalue()]),
         media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": f"attachment; filename=waterlevels.zip"}
+        headers={"Content-Disposition": f"attachment; filename=waterlevels.zip"},
     )
 
 
 @app.get("/", response_class=HTMLResponse)
-async def root(request: Request,
-               # lat=None,
-               # lon=None,
-               # easting=None,
-               # northing=None,
-               # depth=None
-               ):
+async def root(
+    request: Request,
+    # lat=None,
+    # lon=None,
+    # easting=None,
+    # northing=None,
+    # depth=None
+):
     # formation = None
     # if depth:
     #     if lat and lon:
@@ -74,14 +76,17 @@ async def root(request: Request,
     #     elif easting and northing:
     #         formation = fm.get_formation(float(easting), float(northing), float(depth), as_utm=True)
 
-    return templates.TemplateResponse("index.html",
-                                      {'request': request}
-                                      # {'request': request,
-                                      #                'formation': formation,
-                                      #                'lat': lat or '',
-                                      #                'lon': lon or '',
-                                      #                'northing': northing or '',
-                                      #                'easting': easting or '',
-                                      #                'depth': depth or ''}
-                                      )
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+        # {'request': request,
+        #                'formation': formation,
+        #                'lat': lat or '',
+        #                'lon': lon or '',
+        #                'northing': northing or '',
+        #                'easting': easting or '',
+        #                'depth': depth or ''}
+    )
+
+
 # ============= EOF =============================================
