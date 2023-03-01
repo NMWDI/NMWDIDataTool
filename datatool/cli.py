@@ -326,7 +326,6 @@ def mlocations(
     "default",
 )
 def pods(query, pages, expand, within, bbox, screen, verbose, out):
-
     url = "ose.newmexicowaterdata.org"
     # urls = ['https://labs.waterdata.usgs.gov/sta/v1.1']
     if out and out.endswith(".shp"):
