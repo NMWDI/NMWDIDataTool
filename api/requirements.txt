@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+jinja2
+pysta
+shapely
+#gunicorn
+#rasterio
+#pyproj

@@ -1,0 +1,4 @@
+service: reporter
+runtime: python39
+instance_class: F4
+entrypoint: gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
