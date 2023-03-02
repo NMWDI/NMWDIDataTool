@@ -489,16 +489,20 @@ def warning(msg):
 
 
 if __name__ == "__main__":
-    location = ''
+    location = ""
     within = None
     last = None
     out = None
     screen = True
     verbose = True
     water_obs(
-        location, 'ISC_SEVEN_RIVERS',
-        within, last,
-        out, screen,
-        verbose, "Groundwater Levels"
+        location,
+        "ISC_SEVEN_RIVERS",
+        within,
+        last,
+        out,
+        screen,
+        verbose,
+        "Groundwater Levels",
     )
 # ============= EOF =============================================
