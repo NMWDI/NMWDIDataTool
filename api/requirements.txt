@@ -3,6 +3,6 @@ uvicorn
 jinja2
 pysta
 shapely
-#gunicorn
+gunicorn
 #rasterio
 #pyproj
