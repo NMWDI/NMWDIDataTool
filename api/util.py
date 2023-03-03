@@ -22,24 +22,7 @@ from shapely.geometry import Polygon
 
 from sta.client import Client
 
-
-def make_clt():
-    url = "https://st2.newmexicowaterdata.org/FROST-Server/v1.1"
-    clt = Client(base_url=url)
-    return clt
-
-
-def make_location_row(loc):
-    well = loc["Things"][0]
-
-    return [
-        loc["name"],
-        loc["description"],
-        loc["location"]["coordinates"][1],
-        loc["location"]["coordinates"][0],
-        loc["properties"].get("Altitude"),
-        well["properties"].get("WellDepth"),
-    ]
+from geoconnex import get_huc_polygon, get_county_polygon
 
 
 def get_mrg_locations(*args, **kw):
@@ -48,10 +31,7 @@ def get_mrg_locations(*args, **kw):
     if "pages" not in kw:
         kw["pages"] = 1
 
-    MRG_LOCATION_NAMES = ["BC-0001", "BC-0002"]
-
-    fs = " or ".join([f"name eq '{n}'" for n in MRG_LOCATION_NAMES])
-    f = f"({fs})"
+    f = make_huc_filter(8, '13020203')
     return _get_locations(query=f, *args, **kw)
 
 
@@ -59,13 +39,28 @@ def get_mrg_waterlevels_csv(*args, **kw):
     clt = make_clt()
     csvs = []
     for loc in get_mrg_locations(expand="Things/Datastreams"):
-        lc = get_waterlevels_csv(clt, loc)
+        name = loc['name']
+        if name in ('LALF10',
+                    'LALF11',
+                    'LALF12',
+                    'LALF13',
+                    'LALF14',
+                    'LALF15',
+                    'LALF18',
+                    'IW4',
+                    ):
+            continue
+
+        print(f'getting water levels for {name}')
+        lc = _get_waterlevels_csv(clt, loc)
         if lc:
-            csvs.append((loc["name"], lc))
+            csvs.append((name, lc))
+
+    print('go all waterlevels')
     return csvs
 
 
-def get_waterlevels_csv(clt, loc):
+def _get_waterlevels_csv(clt, loc):
     try:
         dsid = next(
             (
@@ -99,69 +94,6 @@ def get_mrg_locations_csv(*args, **kw):
     return csv
 
 
-def get_waterlevels_within(within):
-    clt = make_clt()
-    with open("./out/sitemetadata.csv", "w") as wfile:
-        writer = csv.writer(wfile)
-        writer.writerow(
-            ["name", "description", "latitude", "longitude", "altitude", "well_depth"]
-        )
-
-        for i, location in enumerate(
-            _get_locations(within, expand="Things/Datastreams")
-        ):
-            if get_waterlevels(clt, location):
-                writer.writerow(make_location_row(location))
-
-                if i > 10:
-                    break
-
-
-def get_waterlevels_for_locations(location_names):
-    clt = make_clt()
-    for l in location_names:
-        loc = next(clt.get_locations(f"name eq '{l}'", expand="Things/Datastreams"))
-        get_waterlevels(clt, loc)
-
-
-def get_waterlevels(clt, loc):
-    print(f"getting waterlevels for location={loc['name']}")
-    try:
-        dsid = next(
-            (
-                ds
-                for ds in loc["Things"][0]["Datastreams"]
-                if ds["name"] == "Groundwater Levels"
-            ),
-            None,
-        )
-    except KeyError:
-        print(loc)
-        print(f"skipping {loc['name']}")
-        return
-
-    if dsid:
-        with open(f"./out/{loc['name']}_waterlevels.csv", "w") as wfile:
-            writer = csv.writer(wfile)
-            for ob in clt.get_observations(dsid):
-                row = [ob["phenomenonTime"], ob["result"]]
-                writer.writerow(row)
-
-            return True
-
-
-def get_locations(*args, **kw):
-    def todict(loc):
-        return {
-            "name": loc["name"],
-            "latitude": loc["location"]["coordinates"][1],
-            "longitude": loc["location"]["coordinates"][0],
-            "elevation": loc["properties"].get("Altitude"),
-        }
-
-    return [todict(l) for l in _get_locations(pages=1, *args, **kw)]
-
-
 def _get_locations(within=None, query=None, **kw):
     clt = make_clt()
 
@@ -174,6 +106,37 @@ def _get_locations(within=None, query=None, **kw):
         query = " and ".join(filterargs)
 
     yield from clt.get_locations(query=query, **kw)
+
+
+def make_clt():
+    url = "https://st2.newmexicowaterdata.org/FROST-Server/v1.1"
+    clt = Client(base_url=url)
+    return clt
+
+
+def make_location_row(loc):
+    well = loc["Things"][0]
+
+    return [
+        loc["name"],
+        loc["description"],
+        loc["location"]["coordinates"][1],
+        loc["location"]["coordinates"][0],
+        loc["properties"].get("Altitude"),
+        well["properties"].get("WellDepth"),
+    ]
+
+
+def make_county_filter(county, tolerance=10):
+    poly = get_county_polygon(county)
+    wkt = poly.simplify(tolerance).wkt
+    return make_within(wkt)
+
+
+def make_huc_filter(level, huc, tolerance=10):
+    poly = get_huc_polygon(level, huc)
+    wkt = poly.simplify(tolerance).wkt
+    return make_within(wkt)
 
 
 def make_wkt(within):
@@ -205,10 +168,9 @@ def make_wkt(within):
 def make_within(wkt):
     return f"st_within(Location/location, geography'{wkt}')"
 
-
-if __name__ == "__main__":
-    # names = ['MG-030']
-    # get_waterlevels_for_locations(names)
-    # get_locations()
-    get_waterlevels_within(None)
+# if __name__ == "__main__":
+# names = ['MG-030']
+# get_waterlevels_for_locations(names)
+# get_locations()
+# get_waterlevels_within(None)
 # ============= EOF =============================================

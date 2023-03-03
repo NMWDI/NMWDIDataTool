@@ -27,7 +27,7 @@ from typing import List
 
 from starlette.responses import StreamingResponse
 
-from util import get_locations, get_mrg_locations_csv, get_mrg_waterlevels_csv
+from util import get_mrg_locations_csv, get_mrg_waterlevels_csv
 from response_models import WaterLevel, Location
 
 app = FastAPI()
