@@ -17,8 +17,10 @@ import csv
 import os
 from pprint import pprint
 
+import geopandas
+import shapefile
 import shapely
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, shape
 
 from sta.client import Client
 
@@ -31,7 +33,9 @@ def get_mrg_locations(*args, **kw):
     if "pages" not in kw:
         kw["pages"] = 1
 
-    f = make_huc_filter(8, '13020203')
+    # f = make_huc_filter(8, '13020203')
+    f = make_shp_filter('RegiionalABQ_Socorro_1km_BOUND')
+
     return _get_locations(query=f, *args, **kw)
 
 
@@ -117,13 +121,21 @@ def make_clt():
 def make_location_row(loc):
     well = loc["Things"][0]
 
+    altitude = loc['properties'].get('Altitude')
+    if altitude is None:
+        altitude = loc.properties.get('altitude')
+
+    wd = well['properties'].get('WellDepth')
+    if wd is None:
+        wd = well['properties'].get('well_depth')
+
     return [
         loc["name"],
         loc["description"],
         loc["location"]["coordinates"][1],
         loc["location"]["coordinates"][0],
-        loc["properties"].get("Altitude"),
-        well["properties"].get("WellDepth"),
+        altitude,
+        wd
     ]
 
 
@@ -135,6 +147,24 @@ def make_county_filter(county, tolerance=10):
 
 def make_huc_filter(level, huc, tolerance=10):
     poly = get_huc_polygon(level, huc)
+    wkt = poly.simplify(tolerance).wkt
+    return make_within(wkt)
+
+
+def get_shp_polygon(name):
+    path = f'data/{name}/{name}.shp'
+    # sp = shapefile.Reader(f'data/{name}/{name}.shp')
+    df = geopandas.read_file(path)
+    df = df.to_crs('epsg:4326')
+    # print(df.iloc[0].geometry)
+    # feature = sp.shapeRecord(0)
+    # geo = feature.shape.__geo_interface__
+    # return shape(geo)
+    return df.iloc[0].geometry
+
+
+def make_shp_filter(name, tolerance=20):
+    poly = get_shp_polygon(name)
     wkt = poly.simplify(tolerance).wkt
     return make_within(wkt)
 
