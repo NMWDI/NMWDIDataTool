@@ -34,7 +34,7 @@ def get_mrg_locations(*args, **kw):
         kw["pages"] = 1
 
     # f = make_huc_filter(8, '13020203')
-    f = make_shp_filter('RegiionalABQ_Socorro_1km_BOUND')
+    f = make_shp_filter("RegiionalABQ_Socorro_1km_BOUND")
 
     return _get_locations(query=f, *args, **kw)
 
@@ -43,24 +43,25 @@ def get_mrg_waterlevels_csv(*args, **kw):
     clt = make_clt()
     csvs = []
     for loc in get_mrg_locations(expand="Things/Datastreams"):
-        name = loc['name']
-        if name in ('LALF10',
-                    'LALF11',
-                    'LALF12',
-                    'LALF13',
-                    'LALF14',
-                    'LALF15',
-                    'LALF18',
-                    'IW4',
-                    ):
+        name = loc["name"]
+        if name in (
+            "LALF10",
+            "LALF11",
+            "LALF12",
+            "LALF13",
+            "LALF14",
+            "LALF15",
+            "LALF18",
+            "IW4",
+        ):
             continue
 
-        print(f'getting water levels for {name}')
+        print(f"getting water levels for {name}")
         lc = _get_waterlevels_csv(clt, loc)
         if lc:
             csvs.append((name, lc))
 
-    print('go all waterlevels')
+    print("go all waterlevels")
     return csvs
 
 
@@ -121,13 +122,13 @@ def make_clt():
 def make_location_row(loc):
     well = loc["Things"][0]
 
-    altitude = loc['properties'].get('Altitude')
+    altitude = loc["properties"].get("Altitude")
     if altitude is None:
-        altitude = loc.properties.get('altitude')
+        altitude = loc.properties.get("altitude")
 
-    wd = well['properties'].get('WellDepth')
+    wd = well["properties"].get("WellDepth")
     if wd is None:
-        wd = well['properties'].get('well_depth')
+        wd = well["properties"].get("well_depth")
 
     return [
         loc["name"],
@@ -135,7 +136,7 @@ def make_location_row(loc):
         loc["location"]["coordinates"][1],
         loc["location"]["coordinates"][0],
         altitude,
-        wd
+        wd,
     ]
 
 
@@ -152,10 +153,10 @@ def make_huc_filter(level, huc, tolerance=10):
 
 
 def get_shp_polygon(name):
-    path = f'data/{name}/{name}.shp'
+    path = f"data/{name}/{name}.shp"
     # sp = shapefile.Reader(f'data/{name}/{name}.shp')
     df = geopandas.read_file(path)
-    df = df.to_crs('epsg:4326')
+    df = df.to_crs("epsg:4326")
     # print(df.iloc[0].geometry)
     # feature = sp.shapeRecord(0)
     # geo = feature.shape.__geo_interface__
@@ -197,6 +198,7 @@ def make_wkt(within):
 
 def make_within(wkt):
     return f"st_within(Location/location, geography'{wkt}')"
+
 
 # if __name__ == "__main__":
 # names = ['MG-030']

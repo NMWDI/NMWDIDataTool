@@ -53,7 +53,9 @@ def get_state_polygon(state):
         #
         # with open(p, "r") as rfile:
         #     obj = json.load(rfile)
-        url = f"https://reference.geoconnex.us/collections/states/items/{statefp}?&f=json"
+        url = (
+            f"https://reference.geoconnex.us/collections/states/items/{statefp}?&f=json"
+        )
         resp = requests.get(url)
         obj = resp.json()
 
@@ -66,10 +68,10 @@ def get_state_bb(state):
 
 
 def get_huc_polygon(level, huc):
-    url = f'https://geoconnex.us/ref/hu{level:02n}/{huc}?f=json'
+    url = f"https://geoconnex.us/ref/hu{level:02n}/{huc}?f=json"
     resp = requests.get(url)
     obj = resp.json()
-    return Polygon(obj['geometry']["coordinates"][0][0])
+    return Polygon(obj["geometry"]["coordinates"][0][0])
 
 
 def get_county_polygon(name):
@@ -100,5 +102,6 @@ def get_county_polygon(name):
         for f in obj["features"]:
             if f["properties"]["NAME"].lower() == county:
                 return Polygon(f["geometry"]["coordinates"][0][0])
+
 
 # ============= EOF =============================================
