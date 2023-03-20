@@ -129,7 +129,7 @@ def make_location_row(loc):
     wd = well["properties"].get("WellDepth")
     if wd is None:
         wd = well["properties"].get("well_depth")
-    url = loc['@iot.selfLink']
+    url = loc["@iot.selfLink"]
 
     return [
         loc["name"],
@@ -138,7 +138,7 @@ def make_location_row(loc):
         loc["location"]["coordinates"][0],
         altitude,
         wd,
-        url
+        url,
     ]
 
 
