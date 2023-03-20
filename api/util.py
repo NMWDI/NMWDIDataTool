@@ -95,7 +95,7 @@ def get_mrg_locations_csv(*args, **kw):
     csv = "\n".join(
         (",".join(map(str, make_location_row(location))) for location in locations)
     )
-    csv = f"name,description,latitude,longitude,elevation,well_depth(ft)\n{csv}"
+    csv = f"name,description,latitude,longitude,elevation,well_depth(ft),url\n{csv}"
     return csv
 
 
@@ -129,6 +129,7 @@ def make_location_row(loc):
     wd = well["properties"].get("WellDepth")
     if wd is None:
         wd = well["properties"].get("well_depth")
+    url = loc['@iot.selfLink']
 
     return [
         loc["name"],
@@ -137,6 +138,7 @@ def make_location_row(loc):
         loc["location"]["coordinates"][0],
         altitude,
         wd,
+        url
     ]
 
 
