@@ -27,28 +27,39 @@ from typing import List
 
 from starlette.responses import StreamingResponse
 
-from util import get_mrg_locations_csv, get_mrg_waterlevels_csv
+from util import get_mrg_locations_csv, get_mrg_waterlevels_csv, get_mrg_boundary_gdf
 from response_models import WaterLevel, Location
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/mrg_locations")
-async def get_waterlevels_locations():
+@app.get("/mrg_boundary")
+async def get_mrg_boundary(simplify: float = 0.05, buf: float = 0.25):
+    gdf = get_mrg_boundary_gdf(simplify=simplify, buf=buf)
+
     return StreamingResponse(
-        iter(get_mrg_locations_csv()),
+        iter([gdf.to_json()]),
+        media_type="application/json",
+        headers={"Content-Disposition": f"attachment; filename=boundary.geojson"}
+    )
+
+
+@app.get("/mrg_locations")
+async def get_waterlevels_locations(simplify: float = 0.05, buf: float = 0.25):
+    return StreamingResponse(
+        iter(get_mrg_locations_csv(simplify, buf)),
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=mrg_locations.csv"},
     )
 
 
 @app.get("/mrg_waterlevels")
-async def get_waterlevels():
-    csvs = get_mrg_waterlevels_csv()
+async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25):
+    csvs = get_mrg_waterlevels_csv(simplify,buf)
     zip_io = BytesIO()
     with zipfile.ZipFile(
-        zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
+            zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as temp_zip:
         for name, ci in csvs:
             temp_zip.writestr(f"{name}.csv", ci)
@@ -62,12 +73,12 @@ async def get_waterlevels():
 
 @app.get("/", response_class=HTMLResponse)
 async def root(
-    request: Request,
-    # lat=None,
-    # lon=None,
-    # easting=None,
-    # northing=None,
-    # depth=None
+        request: Request,
+        # lat=None,
+        # lon=None,
+        # easting=None,
+        # northing=None,
+        # depth=None
 ):
     # formation = None
     # if depth:
@@ -87,6 +98,5 @@ async def root(
         #                'easting': easting or '',
         #                'depth': depth or ''}
     )
-
 
 # ============= EOF =============================================

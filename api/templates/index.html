@@ -25,7 +25,21 @@
         </div>
         <div class="row">
             <div class="col-2">
+                <form action="/mrg_boundary" method="GET">
+
+                    <input type="text" name="buf" id="buf_boundary" value="0.25">
+                    <input type="submit" value="MRG Boundary">
+                </form>
+            </div>
+            <div class="col">
+                <p>Get the Middle Rio Grande boundary as a GeoJSON</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-2">
                 <form action="/mrg_locations">
+
+                    <input type="text" name="buf" id="buf_locations" value="0.25">
                     <input type="submit" value="MRG Locations">
                 </form>
             </div>
