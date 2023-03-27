@@ -48,7 +48,7 @@ async def get_mrg_boundary(simplify: float = 0.05, buf: float = 0.25):
 @app.get("/mrg_locations")
 async def get_waterlevels_locations(simplify: float = 0.05, buf: float = 0.25):
     return StreamingResponse(
-        iter(get_mrg_locations_csv(simplify, buf)),
+        iter([get_mrg_locations_csv(simplify, buf)]),
         media_type="text/csv",
         headers={"Content-Disposition": f"attachment; filename=mrg_locations.csv"},
     )

@@ -150,6 +150,7 @@ def get_mrg_locations_csv(sim, buf, *args, **kw):
     ]
 
     for location in locations:
+        print(f"getting location for {location['name']}")
         try:
             row = make_location_row(location)
             rows.append(row)
