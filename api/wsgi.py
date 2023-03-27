@@ -41,7 +41,7 @@ async def get_mrg_boundary(simplify: float = 0.05, buf: float = 0.25):
     return StreamingResponse(
         iter([gdf.to_json()]),
         media_type="application/json",
-        headers={"Content-Disposition": f"attachment; filename=boundary.geojson"}
+        headers={"Content-Disposition": f"attachment; filename=boundary.geojson"},
     )
 
 
@@ -56,10 +56,10 @@ async def get_waterlevels_locations(simplify: float = 0.05, buf: float = 0.25):
 
 @app.get("/mrg_waterlevels")
 async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25):
-    csvs = get_mrg_waterlevels_csv(simplify,buf)
+    csvs = get_mrg_waterlevels_csv(simplify, buf)
     zip_io = BytesIO()
     with zipfile.ZipFile(
-            zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
+        zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
     ) as temp_zip:
         for name, ci in csvs:
             temp_zip.writestr(f"{name}.csv", ci)
@@ -73,12 +73,12 @@ async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25):
 
 @app.get("/", response_class=HTMLResponse)
 async def root(
-        request: Request,
-        # lat=None,
-        # lon=None,
-        # easting=None,
-        # northing=None,
-        # depth=None
+    request: Request,
+    # lat=None,
+    # lon=None,
+    # easting=None,
+    # northing=None,
+    # depth=None
 ):
     # formation = None
     # if depth:
@@ -98,5 +98,6 @@ async def root(
         #                'easting': easting or '',
         #                'depth': depth or ''}
     )
+
 
 # ============= EOF =============================================

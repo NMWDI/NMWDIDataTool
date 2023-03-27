@@ -29,7 +29,7 @@ from geoconnex import get_huc_polygon, get_county_polygon
 
 
 def get_mrg_boundary_gdf(simplify=0.05, buf=0.25):
-    name = 'RegiionalABQ_Socorro_1km_BOUND'
+    name = "RegiionalABQ_Socorro_1km_BOUND"
     poly = get_shp_polygon(name)
 
     poly = poly.buffer(buf)
@@ -45,7 +45,7 @@ def get_mrg_locations(sim, buf, *args, **kw):
         kw["pages"] = 100
 
     # f = make_huc_filter(8, '13020203')
-    f = make_shp_filter('RegiionalABQ_Socorro_1km_BOUND', buf, tolerance=sim)
+    f = make_shp_filter("RegiionalABQ_Socorro_1km_BOUND", buf, tolerance=sim)
 
     return _get_locations(query=f, *args, **kw)
 
@@ -54,16 +54,17 @@ def get_mrg_waterlevels_csv(sim, buf, *args, **kw):
     clt = make_clt()
     csvs = []
     for loc in get_mrg_locations(sim, buf, expand="Things/Datastreams"):
-        name = loc['name']
-        if name in ('LALF10',
-                    'LALF11',
-                    'LALF12',
-                    'LALF13',
-                    'LALF14',
-                    'LALF15',
-                    'LALF18',
-                    'IW4',
-                    ):
+        name = loc["name"]
+        if name in (
+            "LALF10",
+            "LALF11",
+            "LALF12",
+            "LALF13",
+            "LALF14",
+            "LALF15",
+            "LALF18",
+            "IW4",
+        ):
             continue
 
         print(f"getting water levels for {name}")
@@ -91,21 +92,34 @@ def _get_waterlevels_csv(clt, loc):
         return
 
     if dsid:
+
         def make_row(o):
-            if 'parameters' in o:
-                datasource = o['parameters'].get('DataSource')
-                measuring_agency = o['parameters'].get('MeasuringAgency')
+            if "parameters" in o:
+                datasource = o["parameters"].get("DataSource")
+                measuring_agency = o["parameters"].get("MeasuringAgency")
             else:
                 datasource = None
-                measuring_agency = loc['properties'].get('agency')
-                if measuring_agency == 'CABQ':
-                    datasource = 'e-probe measurement'
+                measuring_agency = loc["properties"].get("agency")
+                if measuring_agency == "CABQ":
+                    datasource = "e-probe measurement"
 
-            return [o['phenomenonTime'], f"{o['result']:0.2f}", datasource, measuring_agency]
+            return [
+                o["phenomenonTime"],
+                f"{o['result']:0.2f}",
+                datasource,
+                measuring_agency,
+            ]
             # row = [str(r) for r in row]
             # return ','.join(row)
 
-        rows = [["phenomenon_time", "depth_to_water (bgs ft)", "data_source", "measuring_agency"]]
+        rows = [
+            [
+                "phenomenon_time",
+                "depth_to_water (bgs ft)",
+                "data_source",
+                "measuring_agency",
+            ]
+        ]
         rows.extend([make_row(o) for o in clt.get_observations(dsid)])
 
         # obs = "\n".join(
@@ -121,8 +135,19 @@ def _get_waterlevels_csv(clt, loc):
 
 def get_mrg_locations_csv(sim, buf, *args, **kw):
     locations = get_mrg_locations(sim, buf)
-    rows = [["name", "description", "latitude", "longitude",
-        "datum", "elevation(ft asl)", "well_depth(ft)", "agency", "url"]]
+    rows = [
+        [
+            "name",
+            "description",
+            "latitude",
+            "longitude",
+            "datum",
+            "elevation(ft asl)",
+            "well_depth(ft)",
+            "agency",
+            "url",
+        ]
+    ]
 
     for location in locations:
         try:
@@ -162,7 +187,7 @@ def make_location_row(loc):
 
     altitude = loc["properties"].get("Altitude")
     if altitude is None:
-        altitude = loc['properties'].get('altitude', -9999)
+        altitude = loc["properties"].get("altitude", -9999)
 
     altitude = float(altitude)
 
@@ -176,11 +201,11 @@ def make_location_row(loc):
         loc["description"],
         f'{loc["location"]["coordinates"][1]:0.9f}',
         f'{loc["location"]["coordinates"][0]:0.9f}',
-        'WGS84',
-        f'{altitude:0.2f}',
+        "WGS84",
+        f"{altitude:0.2f}",
         wd,
-        loc["properties"].get('agency'),
-        url
+        loc["properties"].get("agency"),
+        url,
     ]
 
 
@@ -249,7 +274,7 @@ def make_within(wkt):
 
 if __name__ == "__main__":
     # f = make_shp_filter('RegiionalABQ_Socorro_1km_BOUND')
-    name = 'RegiionalABQ_Socorro_1km_BOUND'
+    name = "RegiionalABQ_Socorro_1km_BOUND"
     poly = get_shp_polygon(name)
     #
     simplify = 0.05
@@ -259,9 +284,9 @@ if __name__ == "__main__":
     # poly = affinity.scale(poly, 2.0, 2.0)
 
     gdf = geopandas.GeoDataFrame(geometry=[poly])
-    gdf.to_file(f'data/outline_buffer{buffer}{simplify}.shp')
+    gdf.to_file(f"data/outline_buffer{buffer}{simplify}.shp")
 
-    gdf.to_file('data/foo.geojson', driver="GeoJSON")
+    gdf.to_file("data/foo.geojson", driver="GeoJSON")
 
     # with open('data/foo.geojson', 'w') as wfile:
     #     j = get_mrg_boundary_geojson()
