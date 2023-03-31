@@ -62,7 +62,7 @@ async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25, as_zip=Fals
     if as_zip:
         zip_io = BytesIO()
         with zipfile.ZipFile(
-                zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
+            zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
         ) as temp_zip:
             for name, ci in csvs:
                 output = io.StringIO()
@@ -71,17 +71,16 @@ async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25, as_zip=Fals
                 ci = output.getvalue()
                 temp_zip.writestr(f"{name}.csv", ci)
         payload = iter([zip_io.getvalue()])
-        media_type = "application/x-zip-compressed",
+        media_type = ("application/x-zip-compressed",)
     else:
         stringio = StringIO()
         writer = csv.writer(stringio)
         for j, (name, rows) in enumerate(csvs):
             for i, row in enumerate(rows):
-
                 if i == 0:
                     if j > 0:
                         continue
-                    nrow = ['location'] + row
+                    nrow = ["location"] + row
                 else:
                     nrow = [name] + row
 
@@ -90,21 +89,23 @@ async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25, as_zip=Fals
         payload = iter([stringio.getvalue()])
         media_type = "text/csv"
 
-    return StreamingResponse(payload,
-                             media_type=media_type,
-                             headers={
-                                 "Content-Disposition": f"attachment; filename=waterlevels.{'zip' if as_zip else 'csv'}"},
-                             )
+    return StreamingResponse(
+        payload,
+        media_type=media_type,
+        headers={
+            "Content-Disposition": f"attachment; filename=waterlevels.{'zip' if as_zip else 'csv'}"
+        },
+    )
 
 
 @app.get("/", response_class=HTMLResponse)
 async def root(
-        request: Request,
-        # lat=None,
-        # lon=None,
-        # easting=None,
-        # northing=None,
-        # depth=None
+    request: Request,
+    # lat=None,
+    # lon=None,
+    # easting=None,
+    # northing=None,
+    # depth=None
 ):
     # formation = None
     # if depth:
@@ -124,5 +125,6 @@ async def root(
         #                'easting': easting or '',
         #                'depth': depth or ''}
     )
+
 
 # ============= EOF =============================================
