@@ -1,0 +1,57 @@
+[
+  {
+    "CODE": "A",
+    "MEANING": "Altimeter",
+    "id": 1
+  },
+  {
+    "CODE": "D",
+    "MEANING": "Differentially corrected GPS",
+    "id": 2
+  },
+  {
+    "CODE": "F",
+    "MEANING": "Survey-grade GPS",
+    "id": 3
+  },
+  {
+    "CODE": "G",
+    "MEANING": "Global positioning system (GPS)",
+    "id": 4
+  },
+  {
+    "CODE": "I",
+    "MEANING": "LiDAR DEM",
+    "id": 5
+  },
+  {
+    "CODE": "L",
+    "MEANING": "Level or other survey method",
+    "id": 6
+  },
+  {
+    "CODE": "M",
+    "MEANING": "Interpolated from topographic map",
+    "id": 7
+  },
+  {
+    "CODE": "N",
+    "MEANING": "Interpolated from digital elevation model (DEM)",
+    "id": 8
+  },
+  {
+    "CODE": "R",
+    "MEANING": "Reported",
+    "id": 9
+  },
+  {
+    "CODE": "U",
+    "MEANING": "Unknown",
+    "id": 10
+  },
+  {
+    "CODE": "W",
+    "MEANING": "Survey-grade Global Navigation Satellite Sys, Lvl1",
+    "id": 11
+  }
+]

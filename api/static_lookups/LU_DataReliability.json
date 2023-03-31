@@ -1,0 +1,22 @@
+[
+  {
+    "CODE": "C",
+    "MEANING": "Data field checked by reporting agency",
+    "id": 1
+  },
+  {
+    "CODE": "L",
+    "MEANING": "Location not correct",
+    "id": 2
+  },
+  {
+    "CODE": "M",
+    "MEANING": "Minimal data",
+    "id": 3
+  },
+  {
+    "CODE": "U",
+    "MEANING": "Data not field checked, but considered reliable",
+    "id": 4
+  }
+]

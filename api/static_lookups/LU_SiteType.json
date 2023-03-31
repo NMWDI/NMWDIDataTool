@@ -1,0 +1,57 @@
+[
+  {
+    "CODE": "D",
+    "MEANING": "Diversion of surface water, etc",
+    "id": 1
+  },
+  {
+    "CODE": "ES",
+    "MEANING": "Ephemeral stream",
+    "id": 2
+  },
+  {
+    "CODE": "GW",
+    "MEANING": "Groundwater other than spring (well)",
+    "id": 3
+  },
+  {
+    "CODE": "L",
+    "MEANING": "Lake, pond or reservoir",
+    "id": 4
+  },
+  {
+    "CODE": "M",
+    "MEANING": "Meteorological (rain, snow)",
+    "id": 5
+  },
+  {
+    "CODE": "O",
+    "MEANING": "Outfall of wastewater or return flow",
+    "id": 6
+  },
+  {
+    "CODE": "OT",
+    "MEANING": "Other",
+    "id": 7
+  },
+  {
+    "CODE": "PS",
+    "MEANING": "Perennial stream",
+    "id": 8
+  },
+  {
+    "CODE": "R",
+    "MEANING": "Rock sample location",
+    "id": 9
+  },
+  {
+    "CODE": "S",
+    "MEANING": "Soil gas sample location",
+    "id": 10
+  },
+  {
+    "CODE": "SP",
+    "MEANING": "Spring",
+    "id": 11
+  }
+]

@@ -1,0 +1,52 @@
+[
+  {
+    "CODE": "A",
+    "MEANING": "Reported by another agency",
+    "id": 1
+  },
+  {
+    "CODE": "D",
+    "MEANING": "From driller's log or well report",
+    "id": 2
+  },
+  {
+    "CODE": "G",
+    "MEANING": "Private geologist, consultant or univ associate",
+    "id": 3
+  },
+  {
+    "CODE": "L",
+    "MEANING": "Depth interpreted fr geophys logs by source agency",
+    "id": 4
+  },
+  {
+    "CODE": "M",
+    "MEANING": "Memory of owner, operator, driller",
+    "id": 5
+  },
+  {
+    "CODE": "O",
+    "MEANING": "Reported by owner of well",
+    "id": 6
+  },
+  {
+    "CODE": "R",
+    "MEANING": "Reported by person other than driller owner agency",
+    "id": 7
+  },
+  {
+    "CODE": "S",
+    "MEANING": "Measured by NMBGMR staff",
+    "id": 8
+  },
+  {
+    "CODE": "Z",
+    "MEANING": "Other",
+    "id": 9
+  },
+  {
+    "CODE": "P",
+    "MEANING": "Data Portal",
+    "id": 10
+  }
+]

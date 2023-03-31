@@ -1,0 +1,57 @@
+[
+  {
+    "CODE": "A",
+    "MEANING": "Artesian",
+    "id": 1
+  },
+  {
+    "CODE": "C",
+    "MEANING": "Confined single aquifer",
+    "id": 2
+  },
+  {
+    "CODE": "D",
+    "MEANING": "Unsaturated (dry)",
+    "id": 3
+  },
+  {
+    "CODE": "F",
+    "MEANING": "Fractured",
+    "id": 4
+  },
+  {
+    "CODE": "M",
+    "MEANING": "Confined multiple aquifers",
+    "id": 5
+  },
+  {
+    "CODE": "N",
+    "MEANING": "Unconfined multiple aquifers",
+    "id": 6
+  },
+  {
+    "CODE": "P",
+    "MEANING": "Perched aquifer",
+    "id": 7
+  },
+  {
+    "CODE": "Q",
+    "MEANING": "Confining layer or aquitard",
+    "id": 8
+  },
+  {
+    "CODE": "Sc",
+    "MEANING": "Semi-confined",
+    "id": 9
+  },
+  {
+    "CODE": "U",
+    "MEANING": "Unconfined single aquifer",
+    "id": 10
+  },
+  {
+    "CODE": "X",
+    "MEANING": "Mixed (confined and unconfined multiple aquifers)",
+    "id": 11
+  }
+]

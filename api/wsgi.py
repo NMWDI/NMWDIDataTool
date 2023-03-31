@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ===============================================================================
+import csv
+import io
 import os
 import zipfile
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
@@ -55,30 +57,54 @@ async def get_waterlevels_locations(simplify: float = 0.05, buf: float = 0.25):
 
 
 @app.get("/mrg_waterlevels")
-async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25):
+async def get_waterlevels(simplify: float = 0.05, buf: float = 0.25, as_zip=False):
     csvs = get_mrg_waterlevels_csv(simplify, buf)
-    zip_io = BytesIO()
-    with zipfile.ZipFile(
-        zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
-    ) as temp_zip:
-        for name, ci in csvs:
-            temp_zip.writestr(f"{name}.csv", ci)
+    if as_zip:
+        zip_io = BytesIO()
+        with zipfile.ZipFile(
+                zip_io, mode="w", compression=zipfile.ZIP_DEFLATED
+        ) as temp_zip:
+            for name, ci in csvs:
+                output = io.StringIO()
+                writer = csv.writer(output)
+                writer.writerows(ci)
+                ci = output.getvalue()
+                temp_zip.writestr(f"{name}.csv", ci)
+        payload = iter([zip_io.getvalue()])
+        media_type = "application/x-zip-compressed",
+    else:
+        stringio = StringIO()
+        writer = csv.writer(stringio)
+        for j, (name, rows) in enumerate(csvs):
+            for i, row in enumerate(rows):
 
-    return StreamingResponse(
-        iter([zip_io.getvalue()]),
-        media_type="application/x-zip-compressed",
-        headers={"Content-Disposition": f"attachment; filename=waterlevels.zip"},
-    )
+                if i == 0:
+                    if j > 0:
+                        continue
+                    nrow = ['location'] + row
+                else:
+                    nrow = [name] + row
+
+                writer.writerow(nrow)
+
+        payload = iter([stringio.getvalue()])
+        media_type = "text/csv"
+
+    return StreamingResponse(payload,
+                             media_type=media_type,
+                             headers={
+                                 "Content-Disposition": f"attachment; filename=waterlevels.{'zip' if as_zip else 'csv'}"},
+                             )
 
 
 @app.get("/", response_class=HTMLResponse)
 async def root(
-    request: Request,
-    # lat=None,
-    # lon=None,
-    # easting=None,
-    # northing=None,
-    # depth=None
+        request: Request,
+        # lat=None,
+        # lon=None,
+        # easting=None,
+        # northing=None,
+        # depth=None
 ):
     # formation = None
     # if depth:
@@ -98,6 +124,5 @@ async def root(
         #                'easting': easting or '',
         #                'depth': depth or ''}
     )
-
 
 # ============= EOF =============================================

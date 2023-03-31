@@ -19,6 +19,7 @@ import json
 import os
 
 import geopandas
+import requests
 import shapely
 from shapely import affinity
 from shapely.geometry import Polygon
@@ -26,6 +27,32 @@ from shapely.geometry import Polygon
 from sta.client import Client
 
 from geoconnex import get_huc_polygon, get_county_polygon
+
+NM_AQUIFER_SITEMETADATA = None
+
+
+def get_nm_aquifer_sitemetadata(pointid, objectid=None):
+    global NM_AQUIFER_SITEMETADATA
+    recurse = True
+    if NM_AQUIFER_SITEMETADATA is None:
+        url = 'https://maps.nmt.edu/maps/data/waterlevels/sitemetadata'
+        resp = requests.get(url)
+        NM_AQUIFER_SITEMETADATA = resp.json()
+    else:
+        if objectid:
+            url = 'https://maps.nmt.edu/maps/data/waterlevels/sitemetadata'
+            resp = requests.get(url, params=dict(objectid=objectid))
+            locs = resp.json()
+            recurse = len(locs) > 1
+            NM_AQUIFER_SITEMETADATA.extend(resp.json())
+
+    site = next((loc for loc in NM_AQUIFER_SITEMETADATA if loc['PointID'] == pointid), None)
+    if site is None:
+        objectid = NM_AQUIFER_SITEMETADATA[-1]['OBJECTID']
+        if recurse:
+            return get_nm_aquifer_sitemetadata(pointid, objectid=objectid)
+    else:
+        return site
 
 
 def get_mrg_boundary_gdf(simplify=0.05, buf=0.25):
@@ -40,14 +67,16 @@ def get_mrg_boundary_gdf(simplify=0.05, buf=0.25):
 
 def get_mrg_locations(sim, buf, *args, **kw):
     if "expand" not in kw:
-        kw["expand"] = "Things"
+        kw["expand"] = "Things/Datastreams"
     if "pages" not in kw:
         kw["pages"] = 100
 
     # f = make_huc_filter(8, '13020203')
     f = make_shp_filter("RegiionalABQ_Socorro_1km_BOUND", buf, tolerance=sim)
 
-    return _get_locations(query=f, *args, **kw)
+    locations = _get_locations(query=f, *args, **kw)
+    return [loc for loc in locations if
+            any((ds["name"] == "Groundwater Levels" for ds in loc["Things"][0]["Datastreams"]))]
 
 
 def get_mrg_waterlevels_csv(sim, buf, *args, **kw):
@@ -56,14 +85,14 @@ def get_mrg_waterlevels_csv(sim, buf, *args, **kw):
     for loc in get_mrg_locations(sim, buf, expand="Things/Datastreams"):
         name = loc["name"]
         if name in (
-            "LALF10",
-            "LALF11",
-            "LALF12",
-            "LALF13",
-            "LALF14",
-            "LALF15",
-            "LALF18",
-            "IW4",
+                "LALF10",
+                "LALF11",
+                "LALF12",
+                "LALF13",
+                "LALF14",
+                "LALF15",
+                "LALF18",
+                "IW4",
         ):
             continue
 
@@ -71,6 +100,8 @@ def get_mrg_waterlevels_csv(sim, buf, *args, **kw):
         lc = _get_waterlevels_csv(clt, loc)
         if lc:
             csvs.append((name, lc))
+        else:
+            print(f"       no water levels for {name}")
 
     print("go all waterlevels")
     return csvs
@@ -127,32 +158,41 @@ def _get_waterlevels_csv(clt, loc):
         # )
         # csv = "phenomenon_time, depth_to_water (bgs ft), data_source, measuring_agency"
         # csv = f"{csv}\n{obs}"
-        output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerows(rows)
-        return output.getvalue()
+        # output = io.StringIO()
+        # writer = csv.writer(output)
+        # writer.writerows(rows)
+        # return output.getvalue()
+        return rows
+    else:
+        print(f"no water levels for {loc['name']}, {loc['Things'][0]['Datastreams']}")
 
 
 def get_mrg_locations_csv(sim, buf, *args, **kw):
     locations = get_mrg_locations(sim, buf)
-    rows = [
-        [
-            "name",
-            "description",
-            "latitude",
-            "longitude",
-            "datum",
-            "elevation(ft asl)",
-            "well_depth(ft)",
-            "agency",
-            "url",
-        ]
-    ]
-
+    # rows = [
+    #     [
+    #         "name",
+    #         "description",
+    #         "latitude",
+    #         "longitude",
+    #         "datum",
+    #         "elevation(ft asl)",
+    #         "elevation datum",
+    #         "well_depth(ft)",
+    #         "agency",
+    #         "url",
+    #         'ose_well_id',
+    #         'alternate_site_id',
+    #         'nm_aquifer_url',
+    #     ]
+    # ]
+    rows = []
     for location in locations:
         print(f"getting location for {location['name']}")
         try:
-            row = make_location_row(location)
+            header, row = make_location_row(location)
+            if not rows:
+                rows.append(header)
             rows.append(row)
         except IndexError:
             continue
@@ -183,6 +223,27 @@ def make_clt():
     return clt
 
 
+LOOKUPS = {}
+
+
+def lookup(nmsite, key):
+    table = f'LU_{key}'
+
+    if table in LOOKUPS:
+        lookup = LOOKUPS[table]
+    else:
+        with open(f'static_lookups/{table}.json') as f:
+            lookup = json.load(f)
+            LOOKUPS[table] = lookup
+
+    return next((d['MEANING'] for d in lookup if d['CODE'] == nmsite[key]), '')
+
+
+def formation_lookup(nmsite):
+    # return lookup(nmsite, 'FORMATION')
+    return nmsite['FormationZone']
+
+
 def make_location_row(loc):
     well = loc["Things"][0]
 
@@ -195,17 +256,151 @@ def make_location_row(loc):
     wd = well["properties"].get("WellDepth")
     if wd is None:
         wd = well["properties"].get("well_depth")
-    url = loc["@iot.selfLink"]
 
-    return [
+    hd = well["properties"].get("HoleDepth")
+    if hd is None:
+        hd = well["properties"].get("hole_depth")
+
+    url = loc["@iot.selfLink"]
+    agency = loc['properties'].get('agency')
+    nm_aquifer_url = ''
+    ose_well_id, alternate_site_id = '', ''
+    mpheight = 0
+    casing_diameter = 0
+    casing_depth = 0
+    screen_top, screen_bottom = 0, 0
+    static_water_level = 0
+    elevation_method = ''
+    aquifer_type = ''
+
+    ose_well_tag = ''
+    depth_source = ''
+    completion_date = ''
+    completion_source = ''
+    measuring_point = ''
+    formation_zone = ''
+    status = ''
+    current_use = ''
+
+    site_id = ''
+    alternate_site_id = ''
+    alternate_site_id2 = ''
+    data_reliability = ''
+    site_type = ''
+    has_continuous_data = ''
+
+    if agency == 'NMBGMR':
+        # fetch ose wellid and alternative id from NM_Aquifer public api
+        nmsite = get_nm_aquifer_sitemetadata(loc["name"])
+        if nmsite:
+            ose_well_id, alternate_site_id = nmsite['OSEWellID'], nmsite['AlternateSiteID']
+            mpheight = nmsite['MPHeight']
+            casing_diameter = nmsite['CasingDiameter']
+            casing_depth = nmsite['CasingDepth']
+            screens = nmsite['screens']
+            if screens:
+                screen_top = min([s.get('top') or -1 for s in screens])
+                screen_bottom = max([s.get('bottom') or -1 for s in screens])
+            static_water_level = nmsite['StaticWater']
+            nm_aquifer_url = f'https://maps.nmt.edu/maps/data/waterlevels/sitemetadata?pointid={loc["name"]}'
+            elevation_method = lookup(nmsite, 'AltitudeMethod')
+            aquifer_type = lookup(nmsite, 'AquiferType')
+
+            ose_well_tag = nmsite['OSEWelltagID']
+            depth_source = lookup(nmsite, 'DepthSource')
+            completion_date = nmsite['CompletionDate']
+            completion_source = lookup(nmsite, 'CompletionSource')
+            measuring_point = nmsite['MeasuringPoint']
+            formation_zone = formation_lookup(nmsite)
+            status = nmsite['StatusDescription']
+            current_use = nmsite['CurrentUseDescription']
+
+            site_id = nmsite['SiteID']
+            alternate_site_id = nmsite['AlternateSiteID']
+            alternate_site_id2 = nmsite['AlternateSiteID2']
+            data_reliability = lookup(nmsite, 'DataReliability')
+            site_type = lookup(nmsite, 'SiteType')
+            has_continuous_data = True if nmsite['WL_Continuous'] == 'true' else False
+
+    eldatum = loc["properties"].get("AltDatum")
+
+    header = [
+        "name",
+        "description",
+        "latitude",
+        "longitude",
+        "datum",
+        "elevation(ft asl)",
+        "elevation_datum",
+        "elevation_method",
+        "well_depth(ft)",
+        "hole_depth(ft)",
+        "agency",
+        'ose_well_id',
+
+        'ose_well_tag',
+        'depth_source',
+        'completion_date',
+        'completion_source',
+        'measuring_point',
+        'formation_zone',
+        'status',
+        'current_use',
+        'site_id',
+        'alternate_site_id',
+        'alternate_site_id',
+        'data_reliability',
+        'site_type',
+
+        'has_continuous_data',
+
+        'casing_diameter (ft)',
+        'casing_depth (ft bgs)',
+        'measuring_point_height (ft)',
+        'screen_top (ft bgs)',
+        'screen_bottom (ft bgs)',
+        'static_water_level (ft bgs)',
+        'aquifer_type',
+        'nm_aquifer_url',
+        "st_url",
+    ]
+
+    return header, [
         loc["name"],
         loc["description"],
         f'{loc["location"]["coordinates"][1]:0.9f}',
         f'{loc["location"]["coordinates"][0]:0.9f}',
         "WGS84",
         f"{altitude:0.2f}",
-        wd,
+        eldatum,
+        elevation_method,
+        f'{wd or 0:0.2f}',
+        f'{hd or 0:0.2f}',
         loc["properties"].get("agency"),
+        ose_well_id,
+        ose_well_tag,
+        depth_source,
+        completion_date,
+        completion_source,
+        measuring_point,
+        formation_zone,
+        status,
+        current_use,
+
+        site_id,
+        alternate_site_id,
+        alternate_site_id2,
+        data_reliability,
+        site_type,
+        has_continuous_data,
+
+        f'{casing_diameter or 0:0.2f}',
+        f'{casing_depth or 0:0.2f}',
+        f'{mpheight or 0:0.2f}',
+        screen_top, screen_bottom,
+        static_water_level,
+        aquifer_type,
+        nm_aquifer_url,
         url,
     ]
 
